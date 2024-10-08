@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Your Orders{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Your Orders</h2>
+
+    {% if orders %}
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Payment Status</th>
+                    <th>Payment Method</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.order_date|date:"Y-m-d H:i" }}</td>
+                        <td>Pkr{{ order.total_amount|floatformat:2 }}</td>
+                        <td>{{ order.get_order_status_display }}</td>
+                        <td>{{ order.get_payment_status_display }}</td>
+                        <td>{{ order.get_payment_method_display }}</td>
+                        <td>
+                            <a href="{% url 'view_order_details' order.id %}" class="btn btn-info btn-sm">View Details</a>
+                            
+                            <!-- Delete button (if order status is Pending and payment method is Cash on Delivery) -->
+                            {% if order.order_status == 'Pending' and order.payment_method == 'Cash on Delivery' %}
+                                <form method="POST" action="{% url 'delete_order' order.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete Order</button>
+                                </form>
+                            {% endif %}
+                            
+                            <!-- Pay Now button (if payment method is not Cash on Delivery and payment status is Pending) -->
+                            {% if order.payment_method != 'Cash on Delivery' and order.payment_status == 'Pending' %}
+                                <a href="{% url 'pay_order' order.id %}" class="btn btn-warning btn-sm">Pay Now</a>
+                            {% endif %}
+                            
+                            <!-- Customization Request button (if payment status is Paid) -->
+                            {% if order.payment_status == 'Paid' and order.order_status == 'Confirmed' %}
+                                <a href="{% url 'customization_request' order.id %}" class="btn btn-success btn-sm">Add Customization Request</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have no orders yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

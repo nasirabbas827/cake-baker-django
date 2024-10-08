@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}View Profile{% endblock %}
+
+{% block css %}
+    {{ block.super }}
+{% endblock css %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Your Profile</h2>
+        <div class="card mx-auto" style="max-width: 600px;">
+            <div class="card-body text-center">
+                {% if user_profile.profile_picture %}
+                    <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle img-thumbnail mb-3" width="150" height="150">
+                {% endif %}
+                <h5 class="card-title">{{ user_profile.full_name }}</h5>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Email:</strong> {{ user_profile.email }}</li>
+                    <li class="list-group-item"><strong>Date of Birth:</strong> {{ user_profile.date_of_birth }}</li>
+                    <li class="list-group-item"><strong>Gender:</strong> {{ user_profile.gender }}</li>
+                    <li class="list-group-item"><strong>Phone Number:</strong> {{ user_profile.phone_number }}</li>
+                    <li class="list-group-item"><strong>Address:</strong> {{ user_profile.address }}</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{% url 'update_profile' %}" class="btn btn-primary">Update Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
