@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        h3 {
+            color: #333;
+        }
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eeeeee;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Transaction Confirmation for Order #{{ order.id }}</h2>
+
+        <p>Dear {{ order.user.username }},</p>
+        <p>Your payment of <strong>Pkr{{ transaction.amount|floatformat:2 }}</strong> has been successfully received for Order #{{ order.id }}.</p>
+
+        <h3>Order Details:</h3>
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Total Amount:</strong> Pkr{{ order.total_amount|floatformat:2 }}</p>
+        <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+
+        <h3>Items in Your Order:</h3>
+        <ul>
+            {% for item in order.orderitem_set.all %}
+                <li>{{ item.cake.cake_name }} ({{ item.quantity }} x Pkr{{ item.price|floatformat:2 }})</li>
+            {% endfor %}
+        </ul>
+
+        <p>Thank you for your order!</p>
+        <div class="footer">
+            <p>This is an automated email, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

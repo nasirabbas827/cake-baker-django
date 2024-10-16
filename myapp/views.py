@@ -196,10 +196,15 @@ def delete_order(request, order_id):
     return redirect('view_orders')
 
 
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+
 @login_required
 def pay_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user, payment_status='Pending')
-    
+    profile = Profile.objects.get(user=request.user)  # Get the user's profile for the email
+
     if request.method == 'POST':
         form = TransactionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -209,16 +214,46 @@ def pay_order(request, order_id):
             transaction.transaction_date = timezone.now()
             transaction.amount = order.total_amount
             transaction.save()
-            
+
             # Update the order payment status to 'Paid'
             order.payment_status = 'Paid'
             order.save()
-            
+
+            # Send email to the user
+            send_transaction_email(profile.email, order, transaction)
+
             return redirect('view_order_details', order_id=order.id)
     else:
         form = TransactionForm()
 
-    return render(request, 'pay_order.html', {'order': order, 'form': form})
+    return render(request, 'pay_order.html', {'order': order, 'form': form, 'user_email': profile.email})
+
+
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
+
+def send_transaction_email(user_email, order, transaction):
+    # Email subject and message
+    subject = f"Transaction Confirmation for Order #{order.id}"
+    
+    # Use a template to render email content
+    message = render_to_string('transaction_email_template.html', {
+        'order': order,
+        'transaction': transaction,
+        'user_email': user_email,
+    })
+
+    # Create an email object and send the email as HTML
+    email = EmailMessage(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user_email]
+    )
+    email.content_subtype = 'html'  # Set the content type to HTML
+    email.send(fail_silently=False)
+
 
 
 @login_required
